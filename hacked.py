@@ -34,18 +34,7 @@ outfile = create_db()
 outfile_2 = create_pass_db()
 
 # --------------------------------------------------------------------------------------------------------------------
-with open('study_space.json', 'r') as openfile:
-    # Reading from json file
-    json_object = json.load(openfile)
 
-print(type(json_object))
-for vars in json_object:
-    print(vars)
-a = "Rutherford"
-print(json_object["Rutherford"]["Vacant"])
-json_object["Rutherford"]["Vacant"].remove("2")
-print(json_object["Rutherford"]["Vacant"])
-print(type(json_object))
 
 # -----------------------------------------------
 
@@ -66,37 +55,39 @@ if account_option == "create-account":
     with open('credentials.json', 'r') as openfile:
         # Reading from json file
         json_credentials = json.load(openfile)
-        for n in json_credentials:
-            if username == n:
-                #if it exists, sign in
-                print("username already exists, please sign in")
-                username = input("Enter your username: ")
-                password = input("Enter your password: ")
-                if username not in json_credentials:
-                    print("username doesn't exist")
-                for m in json_credentials:
-                    if username == m:
-                        if password == json_credentials[m]:
-                            sign_in = True
-                        else:
-                            print("wrong password")
-            else:
-                #if it doesn't exist, add it to user database
-                json_credentials[username].append(password)
-                with open("credentials.json", "w") as outfile:
-                    json.dump(json_object, outfile)
-                    #todo
-                print("account created, please sign in")
-                username = input("Enter your username: ")
-                password = input("Enter your password: ")
-                if username not in json_credentials:
-                    print("username doesn't exist")
-                for m in json_credentials:
-                    if username == m:
-                        if password == json_credentials[m]:
-                            sign_in = True
-                        else:
-                            print("wrong password")
+        username_list = []
+        for i in json_credentials:
+            username_list.append(i)
+        if username in username_list:
+            #if it exists, sign in
+            print("username already exists, please sign in")
+            username = input("Enter your username: ")
+            password = input("Enter your password: ")
+            if username not in json_credentials:
+                print("username doesn't exist")
+            for m in json_credentials:
+                if username == m:
+                    if password == json_credentials[m]:
+                        sign_in = True
+                    else:
+                        print("wrong password")
+        else:
+            #if it doesn't exist, add it to user database
+            json_credentials[username]=password
+            with open("credentials.json", "w") as outfile:
+                json.dump(json_object, outfile)
+                #todo
+            print("account created, please sign in")
+            username = input("Enter your username: ")
+            password = input("Enter your password: ")
+            if username not in json_credentials:
+                print("username doesn't exist")
+            for m in json_credentials:
+                if username == m:
+                    if password == json_credentials[m]:
+                        sign_in = True
+                    else:
+                        print("wrong password")
 
     #check if the key already exists
 elif account_option == "sign-in":
