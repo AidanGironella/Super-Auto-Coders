@@ -33,4 +33,18 @@ with open('study_space.json', 'r') as openfile:
   
     # Reading from json file
     json_object = json.load(openfile)
-def modification(json_object):
+for vars in json_object:
+  print(vars) 
+building = input("What is the building name?")
+
+print(json_object[building]["Vacant"])
+room = input("Which room would you like to study in?")
+
+if room in (json_object[building]["Vacant"]):
+  json_object[building]["Vacant"].remove(room)
+  json_object[building]["Occupied"].append(room)
+  print("You have successfully secured the "+room+" in the "+building+".")
+  with open("study_space.json", "w") as outfile:
+    json.dump(json_object, outfile)
+else:
+  print("Invalid output")
