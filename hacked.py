@@ -1,150 +1,274 @@
 import json
-
-
-def create_db():
-    study_spaces = {
-	'Athabasca Hall':{'Vacant': ['ATH 2-27'],'Occupied': []},
-	'Augustana Campus Library':{'Vacant': ['Zone 1', 'Zone 2 BYOD', 'Zone 2 Computers'], 'Occupied': []},
-	'Cameron Library':{'Vacant': ['2nd Floor Area 1', 'Basement Knowledge Common B-14D'],'Occupied': []},
-	'Edmonton Clinic Health Academy':{'Vacant': ['ECHA 1-152', 'ECHA  1-153', 'ECHA 1-163', 'ECHA 1-436', 'ECHA 1-464',
-		'EHCA 1-472', 'ECHA L1-230'],'Occupied': []},
-	'Education Building':{'Vacant': ['ED 1-126', 'ED 1-128', 'ED 1-130', 'ED 106', 'ED 206', 'ED 221', 'ED 262',
-		'ED 265', 'ED 377', 'ED B18', 'ED B19'],'Occupied': []},
-	'General Services Building':{'Vacant': ['GSB 7-11', 'GSB 8-11'],'Occupied': []},
-	'Humanities Centre':{'Vacant': ['HC 2-17', 'HC 2-19', 'HC 2-21'],'Occupied': []},
-	'John W. Scott Health Sciences Library':{'Vacant': ['Basement Area 1', 'Basement Area 2'],'Occupied': []},
-	'Rutherford Library':{'Vacant': ['4th Floor Area 1', '4th Floor Area 2'],'Occupied': []},
-	'South Academic Building':{'Vacant': ['SAB 325', 'SAB 326', 'SAB 311', 'SAB 336', 'SAB 436'],'Occupied': []},
-	}
-    with open("study_space.json", "w") as outfile:
-        json.dump(study_spaces, outfile)
-    return outfile
-#creating library database
-
-# class make_change(study_spaces):
-#	return study_sp
-def create_pass_db():
-    credentials = {"Bot": "Bot"}
-    with open("credentials.json", "w") as outfile:
-        json.dump(credentials, outfile)
-    return outfile
-#creating username info database
-
-outfile = create_db()
-outfile_2 = create_pass_db()
-
-# --------------------------------------------------------------------------------------------------------------------
-
-
-# -----------------------------------------------
-
-with open('study_space.json', 'r') as openfile:
-    # Reading from json file
-    json_object = json.load(openfile)
-for vars in json_object:
-    print(vars)
+from os import system
+import time
 
 sign_in = False
-#initializing sign_in boolean value
+tryAgain = False
+cls = lambda: system('cls')
+localTime = time.asctime(time.localtime(time.time()))
 
-account_option = input("create-account or sign-in?")
-if account_option == "create-account":
-    username = input("Enter your username: ")
-    password = input("Enter your password: ")
+#  Read in our databases for both the rooms and the existing user login info
+with open('study_space.json', 'r') as openfile:
+    roomDatabase = json.load(openfile)
+with open('credentials.json', 'r') as openfile:
+        userLoginDatabase = json.load(openfile)
+with open('statuses.json', 'r') as openfile:
+        userStatuses = json.load(openfile)
 
-    with open('credentials.json', 'r') as openfile:
-        # Reading from json file
-        json_credentials = json.load(openfile)
-        username_list = []
-        for i in json_credentials:
-            username_list.append(i)
-        if username in username_list:
-            #if it exists, sign in
-            print("username already exists, please sign in")
-            username = input("Enter your username: ")
-            password = input("Enter your password: ")
-            if username not in json_credentials:
-                print("username doesn't exist")
-            for m in json_credentials:
-                if username == m:
-                    if password == json_credentials[m]:
-                        sign_in = True
-                    else:
-                        print("wrong password")
-        else:
-            #if it doesn't exist, add it to user database
-            json_credentials[username]=password
-            with open("credentials.json", "w") as outfile:
-                json.dump(json_object, outfile)
-            print("account created, please sign in")
-            username = input("Enter your username: ")
-            password = input("Enter your password: ")
-            if username not in json_credentials:
-                print("username doesn't exist")
-            for m in json_credentials:
-                if username == m:
-                    if password == json_credentials[m]:
-                        sign_in = True
-                    else:
-                        print("wrong password")
+#  Create a new account
+def createAccount():
+	global userLoginDatabase
+	cls()
+	valid = False
+	while not valid:
+		username = input('Enter a new username: ').strip()
+		#  If the given username already exists, then sign in to that account instead
+		if username in userLoginDatabase.keys():
+			cls()
+			print('Sorry, that username already exists. Please use a different username.')
+		#  If the given username does not already exist, set up a new user
+		else:
+			password = input('Enter a new password: ').strip()
+			userLoginDatabase[username]=password
+			with open('credentials.json', 'w') as outfile:
+				json.dump(userLoginDatabase, outfile)
+			cls()
+			print('Account successfully created! Logging in as {}...'.format(username))
+			time.sleep(2)
+			return(True, username)
+	return(signIn())
 
-    #check if the key already exists
-elif account_option == "sign-in":
-    #sign in function
-    username = input("Enter your username: ")
-    password = input("Enter your password: ")
-    with open('credentials.json', 'r') as openfile:
-        # Reading from json file
-        json_credentials = json.load(openfile)
-        if username not in json_credentials:
-            print("username doesn't exist")
-        for m in json_credentials:
-            if username == m:
-                if password == json_credentials[m]:
-                    sign_in = True
-                else:
-                    print("wrong password")
+#  Delete an existing account
+def deleteAccount():
+	global userLoginDatabase
+	global tryAgain
+	if not tryAgain:
+		username = input('Enter a username to delete: ').strip()
+	else:
+		cls()
+		print('Sorry, we couldn''t find that username in our database. Please try again.')
+		username = input('Enter a username to delete: ').strip()
+	#  If the given username already exists, then prompt the password before deleting the account
+	if username in userLoginDatabase.keys():
+		valid = False
+		while not valid:
+			cls()
+			print('Username to delete: {}'.format(username))
+			password = input('WARNING: This action cannot be reversed.\nEnter your password: ')
+			if password == userLoginDatabase[username]:
+				valid = True
+			else:
+				print('Sorry, that password is incorrect. Please try again.')
+				time.sleep(2)
+		userLoginDatabase.pop(username)
+		with open('credentials.json', 'w') as outfile:
+				json.dump(userLoginDatabase, outfile)
+		print('Success! User {} deleted. Returning to main menu.'.format(username))
+		time.sleep(2)
+		return(False)
+	else:
+		tryAgain = True
+		deleteAccount()
 
-else:
-    print("error")
+#  Sign in with an existing username and password
+def signIn():
+	global userLoginDatabase
+	if not userLoginDatabase:
+		print('There are currently no users in the database. Please create an account first.')
+		time.sleep(3)
+		return(False, '')
+	valid = False
+	while not valid:
+		username = input('Enter your username: ').strip()
+		if username not in userLoginDatabase:
+			cls()
+			print('Sorry, that username does not exist. Please try again.')
+			continue
+		else:
+			valid = True
+	valid = False
+	while not valid:
+		cls()
+		print('Username to login: {}'.format(username))
+		password = input('Enter your password: ').strip()
+		if password == userLoginDatabase[username]:
+			print('Success! User {} logged in!'.format(username))
+			time.sleep(2)
+			valid = True
+			return(True, username)
+		else:
+			cls()
+			print('Sorry, that password is incorrect. Please try again.')
+			time.sleep(2)
 
 
-#create an account
-#sign in with username and pass word
+#  Reserve a room to study in. Returning True will return the user to the previous menu.
+def bookRoom(username):
+	global roomDatabase
+	valid = False
+	if username in userStatuses.keys():
+		print('You are currently signed into {}. Please sign out of this room before booking another one.'.format(userStatuses[username]))
+		print('Returning to menu...')
+		time.sleep(4)
+		return(True)
+	while not valid:
+		cls()
+		for possibleBuilding in roomDatabase:
+			print(possibleBuilding)
+		building = input('\nAbove are the available building(s).\nWhich building would you like to study in? ').strip()
+		if building not in roomDatabase:
+			print('Sorry, we couldn''t find that building in our database. Please try again, and double check your capitalization.')
+			time.sleep(4)
+			continue
+		valid = True
+	#  Valid building successfully chosen - proceed
+	valid = False
+	while not valid:
+		cls()
+		if not roomDatabase[building]['Vacant']:
+			print('Sorry, all rooms in {} are currently occupied. Returning to menu...'.format(building))
+			time.sleep(2)
+			return(True)
+		for possibleRoom in roomDatabase[building]['Vacant']:
+			print(possibleRoom)
+		room = input('\nAbove are the available room(s) in {}.\nWhich room would you like to study in? '.format(building)).strip()
+		if room not in roomDatabase[building]['Vacant']:
+			print('Sorry, we couldn''t find that room in our database. Please try again, and double check your capitalization')
+			time.sleep(4)
+			continue
+		valid = True
+	valid = False
+	while not valid:
+		if room in (roomDatabase[building]['Vacant']):
+			roomDatabase[building]['Vacant'].remove(room)
+			roomDatabase[building]['Occupied'].append(room)
+			userStatuses[username] = room
+			print('Congrats! You have successfully booked {} in {}'.format(room, building))
+			print('Returning to menu...')
+			time.sleep(2)
+			with open('study_space.json', 'w') as outfile:
+				json.dump(roomDatabase, outfile)
+			with open('statuses.json', 'w') as outfile:
+				json.dump(userStatuses, outfile)
+			valid = True
+			return(True)
+		else:
+			print('Sorry, that room is not available at this time. Please try again.')
+			time.sleep(2)
 
-if sign_in == True:
-    #reserve room or sign out
-    options = input("sign-in room or sign-out room?")
-    if options == "sign-in":
-        building = input("What is the building name?")
+#  Check yourself out of a room. Returning True will return the user back to the menu.
+def leaveRoom(username):
+	global roomDatabase
+	global userStatuses
+	valid = False
+	menu = False
+	if username not in userStatuses.keys():
+		print('You are not currently signed into a room. Please book a room before trying to leave one.')
+		print('Returning to menu...')
+		time.sleep(4)
+		return(True)
+	while not valid:
+		cls()
+		for possibleBuilding in roomDatabase:
+			print(possibleBuilding)
+		building = input('\nAbove are all the buildings.\nWhich building are you currently in? ').strip()
+		if building not in roomDatabase:
+			print('Sorry, we couldn''t find that building in our database. Please try again, and double check your capitalization')
+			time.sleep(4)
+		elif not roomDatabase[building]['Occupied']:
+			print('All rooms in {} are currently vacant. Returning to main menu.'.format(building))
+			time.sleep(3)
+			valid = True
+			return(True)
+		else:
+			valid = True
+	#  Valid room selected - proceed.
+	valid = False
+	while not valid:
+		cls()
+		for rooms in roomDatabase[building]['Occupied']:
+			print(rooms)
+		room = input('Above are the currently occupied rooms.\nWhich room would you like to sign out? ').strip()
+		if room in (roomDatabase[building]['Occupied']):
+			roomDatabase[building]['Occupied'].remove(room)
+			roomDatabase[building]['Vacant'].append(room)
+			userStatuses.pop(username)
+			print('You have successfully signed out of {} in {}.'.format(room,building))
+			time.sleep(2)
+			with open('study_space.json', 'w') as outfile:
+				json.dump(roomDatabase, outfile)
+			with open('statuses.json', 'w') as outfile:
+				json.dump(userStatuses, outfile)
+			valid = True
+			return(False)
+		elif room in roomDatabase[building]['Vacant']:
+			print('Sorry, that room appears to already be vacant. Please try again.')
+			time.sleep(3)
+		elif room not in roomDatabase[building]['Vacant'] or room not in roomDatabase[building]['Occupied']:
+			print('Sorry, we couldn''t find that room in our database. Please try again, and double check your capitalization.')
+			time.sleep(4)
+		else:
+			print('Other error. Please try again')
+			time.sleep(2)
 
-        print(json_object[building]["Vacant"])
-        room = input("Which room would you like to study in?")
+#  Where the functions are called from, and where the program starts.
+def login():
+	validCommand = False
+	while not validCommand:
+		cls()
+		print('Welcome to the UofA Study Space Booking Tool!')
+		account_option = input('\nPlease enter one of the following commands:\n\ncreate-account\ndelete-account\nsign-in\nexit\n--> ').strip()
+		if account_option.lower() == 'create-account':
+			cls()
+			success, username = createAccount()
+			validCommand = True
+		elif account_option.lower() == 'sign-in':
+			cls()
+			success, username = signIn()
+			validCommand = True
+		elif account_option.lower() == 'delete-account':
+			cls()
+			success = deleteAccount()
+			username = ''
+			validCommand = True
+		elif account_option.lower() == 'exit':
+			print('Thanks for using the UofA Study Space Booking Tool!')
+			return
+		else:
+			print('Error: unrecognized command. Try again.')
+			time.sleep(2)
+	# success = True
+	# username = 'aidan'
+	main(success, username)
 
-        if room in (json_object[building]["Vacant"]):
-            json_object[building]["Vacant"].remove(room)
-            json_object[building]["Occupied"].append(room)
-            print("You have successfully secured the " + room + " in the " + building + ".")
-            with open("study_space.json", "w") as outfile:
-                json.dump(json_object, outfile)
-        else:
-            print("Invalid output")
-    elif options == "sign-out":
-        building = input("What is the building name?")
+#  Successfully signed in: book or leave room
+def main(success, username):
+	if success:
+		validCommand = False
+		while not validCommand:
+			cls()
+			options = input('Please enter one of the following commands:\nbook-room\nleave-room\nmain-menu\nexit\n--> ').strip()
+			if options.lower() == 'book-room':
+				cls()
+				menu = bookRoom(username)
+				if menu:
+					main(True, username)
+			elif options.lower() == 'leave-room':
+				cls()
+				menu = leaveRoom(username)
+				if menu:
+					main(True, username)
+			elif options.lower() == 'main-menu':
+				print('User {} logged out. Now returning to main menu.'.format(username))
+				time.sleep(3)
+				login()
+			elif options.lower() == 'exit':
+				print('Thanks for using the UofA Study Space Booking Tool!')
+				return
+			else:
+				print('Error: unrecognized command. Try again.')
+				time.sleep(2)
+	else:
+		login()
 
-        print(json_object[building]["Occupied"])
-        room = input("Which room would you like to sign out?")
-
-        if room in (json_object[building]["Occupied"]):
-            json_object[building]["Occupied"].remove(room)
-            json_object[building]["Vacant"].append(room)
-            print("You have successfully signed out the " + room + " in the " + building + ".")
-            with open("study_space.json", "w") as outfile:
-                json.dump(json_object, outfile)
-        else:
-            print("Invalid output")
-    else:
-        print("Invalid input")
-
-else:
-    print("please sign in or create your account first")
+login()
