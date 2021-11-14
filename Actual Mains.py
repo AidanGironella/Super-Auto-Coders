@@ -1,3 +1,6 @@
+import time
+localtime = time.asctime( time.localtime(time.time()) )
+
 with open('study_space.json', 'r') as openfile:
     # Reading from json file
     json_object = json.load(openfile)
@@ -11,8 +14,8 @@ with open('credentials.json', 'r') as openfile:
 sign_in = False
 #initializing sign_in boolean value
 
-account_option = input("create-account or sign-in?")
-if account_option == "create-account":
+account_option = input("To create-account, press 0 \nTo sign-in, press 1?")
+if account_option == "0":
     username = input("Enter your username: ")
     password = input("Enter your password: ")
 
@@ -40,7 +43,7 @@ if account_option == "create-account":
                   print("wrong password")
 
     #check if the key already exists
-elif account_option == "sign-in":
+elif account_option == "1":
     #sign in function
     username = input("Enter your username: ")
     password = input("Enter your password: ")
@@ -67,12 +70,15 @@ if sign_in == True:
         building = input("What is the building name?")
 
         print(json_object[building]["Vacant"])
-        room = input("Which room would you like to study in?")
+        if (json_object[building]["Vacant"]) != []:
+          room = input("Which room would you like to sign in?")
+        else:
+          print("Sorry, no study space is currently available in "+ building)
 
         if room in (json_object[building]["Vacant"]):
             json_object[building]["Vacant"].remove(room)
             json_object[building]["Occupied"].append(room)
-            print("You have successfully secured the " + room + " in the " + building + ".")
+            print(username+" has successfully secured the " + room + " in the " + building + " at "+ localtime)
             with open("study_space.json", "w") as outfile:
                 json.dump(json_object, outfile)
         else:
@@ -81,12 +87,15 @@ if sign_in == True:
         building = input("What is the building name?")
 
         print(json_object[building]["Occupied"])
-        room = input("Which room would you like to sign out?")
+        if (json_object[building]["Occupied"]) != []:
+          room = input("Which room would you like to sign out?")
+        else:
+          print("All the study spaces are vacant in "+ building)
 
         if room in (json_object[building]["Occupied"]):
             json_object[building]["Occupied"].remove(room)
             json_object[building]["Vacant"].append(room)
-            print("You have successfully signed out the " + room + " in the " + building + ".")
+            print(username+" has successfully signed out the " + room + " in the " + building + " at "+ localtime)
             with open("study_space.json", "w") as outfile:
                 json.dump(json_object, outfile)
         else:
