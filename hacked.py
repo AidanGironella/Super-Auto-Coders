@@ -5,6 +5,7 @@ import time
 sign_in = False
 tryAgain = False
 cls = lambda: system('cls')
+localTime = time.asctime(time.localtime(time.time()))
 
 #  Read in our databases for both the rooms and the existing user login info
 with open('study_space.json', 'r') as openfile:
@@ -87,7 +88,7 @@ def signIn():
 			print('Success! User {} logged in!'.format(username))
 			time.sleep(2)
 			valid = True
-			return(True)
+			return(True, username)
 		else:
 			cls()
 			print('Sorry, that password is incorrect. Please try again.')
@@ -98,20 +99,24 @@ def bookRoom():
 	global roomDatabase
 	valid = False
 	while not valid:
+		cls()
 		for possibleBuilding in roomDatabase:
 			print(possibleBuilding)
-		building = input('Above are the available buildings.\nWhich building would you like to study in? ').strip()
+		building = input('\nAbove are the available building(s).\nWhich building would you like to study in? ').strip()
 		if building not in roomDatabase:
 			print('Sorry, we couldn''t find that building in our database. Please try again, and double check your capitalization.')
+			time.sleep(4)
 			continue
 		valid = True
 	valid = False
 	while not valid:
+		cls()
 		for possibleRoom in roomDatabase[building]['Vacant']:
 			print(possibleRoom)
-		room = input('Above are the available rooms.\nWhich room would you like to study in? ').strip()
+		room = input('\nAbove are the available room(s) in {}.\nWhich room would you like to study in? '.format(building)).strip()
 		if room not in roomDatabase[building]['Vacant']:
 			print('Sorry, we couldn''t find that room in our database. Please try again, and double check your capitalization')
+			time.sleep(4)
 			continue
 		valid = True
 	valid = False
@@ -120,11 +125,13 @@ def bookRoom():
 			roomDatabase[building]['Vacant'].remove(room)
 			roomDatabase[building]['Occupied'].append(room)
 			print('Congrats! You have successfully booked {} in {}'.format(room, building))
+			time.sleep(2)
 			with open('study_space.json', 'w') as outfile:
 				json.dump(roomDatabase, outfile)
 			valid = True
 		else:
 			print('Sorry, that room is not available at this time. Please try again.')
+			time.sleep(2)
 
 #  Check yourself out of a room
 def leaveRoom():
@@ -134,8 +141,9 @@ def leaveRoom():
 		building = input('Which building are you currently in? ').strip()
 		if building not in roomDatabase:
 			print('Sorry, we couldn''t find that building in our database. Please try again, and double check your capitalization')
-			continue
-		valid = True
+			time.sleep(4)
+		else:
+			valid = True
 	room = input('Which room would you like to sign out? ').strip()
 	while not valid:
 		if room in (roomDatabase[building]['Occupied']):
@@ -150,35 +158,47 @@ def leaveRoom():
 
 #  Where the functions are called from, and where the program starts.
 def main():
-	cls()
-	account_option = input('Please enter one of the following commands:\ncreate-account\ndelete-account\nsign-in\n--> ').strip()
-	validCommand = False
-	while not validCommand:
-		if account_option.lower() == 'create-account':
-			cls()
-			success = createAccount()
-			validCommand = True
-		elif account_option.lower() == 'sign-in':
-			cls()
-			success = signIn()
-			validCommand = True
-		elif account_option.lower() == 'delete-account':
-			cls()
-			success = deleteAccount()
-			validCommand = True
-		else:
-			print('Error: unrecognized command. Try again.')
+	# validCommand = False
+	# while not validCommand:
+	# 	cls()
+	# 	account_option = input('Please enter one of the following commands:\ncreate-account\ndelete-account\nsign-in\n--> ').strip()
+	# 	if account_option.lower() == 'create-account':
+	# 		cls()
+	# 		success = createAccount()
+	# 		validCommand = True
+	# 	elif account_option.lower() == 'sign-in':
+	# 		cls()
+	# 		success, username = signIn()
+	# 		validCommand = True
+	# 	elif account_option.lower() == 'delete-account':
+	# 		cls()
+	# 		success = deleteAccount()
+	# 		validCommand = True
+	# 	else:
+	# 		print('Error: unrecognized command. Try again.')
+	# 		time.sleep(2)
+	success = True
+	username = 'aidan'
 
 	#  Successfully signed in: book or leave room
 	if success:
-		cls()
-		options = input('Please enter one of the following commands:\nbook-room\nleave-room\nmain-menu\n--> ').strip()
-		if options.lower() == 'book-room':
-			bookRoom()
-		elif options.lower() == 'leave-room':
-			leaveRoom()
-		elif options.lower() == 'main-menu':
-			main()
+		validCommand = False
+		while not validCommand:
+			cls()
+			options = input('Please enter one of the following commands:\nbook-room\nleave-room\nmain-menu\n--> ').strip()
+			if options.lower() == 'book-room':
+				cls()
+				bookRoom()
+			elif options.lower() == 'leave-room':
+				cls()
+				leaveRoom()
+			elif options.lower() == 'main-menu':
+				print('User {} logged out. Now returning to main menu.'.format(username))
+				time.sleep(3)
+				main()
+			else:
+				print('Error: unrecognized command. Try again.')
+				time.sleep(2)
 	else:
 		main()
 
