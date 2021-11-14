@@ -12,7 +12,7 @@ def create_db():
 # class make_change(study_spaces):
 #	return study_sp
 def create_pass_db():
-    credentials = {}
+    credentials = {"Bot": "Bot"}
     with open("credentials.json", "w") as outfile:
         json.dump(credentials, outfile)
     return outfile
