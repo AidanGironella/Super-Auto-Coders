@@ -34,3 +34,4 @@ with open('study_space.json', 'r') as openfile:
     # Reading from json file
     json_object = json.load(openfile)
 def modification(json_object):
+print('this is a test')
