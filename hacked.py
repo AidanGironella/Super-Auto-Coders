@@ -37,7 +37,10 @@ with open('study_space.json', 'r') as openfile:
 for vars in json_object:
     print(vars)
 
-options = input("sign-in or sign-out?")
+#create an account
+#sign in with username and pass word
+
+options = input("sign-in room or sign-out room?")
 if options == "sign-in":
     building = input("What is the building name?")
 
@@ -52,3 +55,19 @@ if options == "sign-in":
             json.dump(json_object, outfile)
     else:
         print("Invalid output")
+elif options == "sign-out":
+    building = input("What is the building name?")
+
+    print(json_object[building]["Occupied"])
+    room = input("Which room would you like to sign out?")
+
+    if room in (json_object[building]["Occupied"]):
+        json_object[building]["Occupied"].remove(room)
+        json_object[building]["Vacant"].append(room)
+        print("You have successfully signed out the " + room + " in the " + building + ".")
+        with open("study_space.json", "w") as outfile:
+            json.dump(json_object, outfile)
+    else:
+        print("Invalid output")
+else:
+    print("Invalid input")
