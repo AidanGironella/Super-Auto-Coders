@@ -74,6 +74,17 @@ if account_option == "create-account":
                 with open("credentials.json", "w") as outfile:
                     json.dump(json_object, outfile)
                     #todo
+                print("account created, please sign in")
+                username = input("Enter your username: ")
+                password = input("Enter your password: ")
+                if username not in json_credentials:
+                    print("username doesn't exist")
+                for m in json_credentials:
+                    if username == m:
+                        if password == json_credentials[m]:
+                            sign_in = True
+                        else:
+                            print("wrong password")
 
     #check if the key already exists
 elif account_option == "sign-in":
