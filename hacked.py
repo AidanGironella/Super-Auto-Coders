@@ -76,7 +76,6 @@ if account_option == "create-account":
             json_credentials[username]=password
             with open("credentials.json", "w") as outfile:
                 json.dump(json_object, outfile)
-                #todo
             print("account created, please sign in")
             username = input("Enter your username: ")
             password = input("Enter your password: ")
