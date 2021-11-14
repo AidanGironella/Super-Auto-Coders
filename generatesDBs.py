@@ -21,3 +21,6 @@ with open('study_space.json', 'w') as outfile:
 credentials = {}
 with open('credentials.json', 'w') as outfile:
     json.dump(credentials, outfile)
+statuses = {}
+with open('statuses.json', 'w') as outfile:
+    json.dump(statuses, outfile)
