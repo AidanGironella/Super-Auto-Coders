@@ -70,6 +70,7 @@ def deleteAccount():
 		tryAgain = True
 		deleteAccount()
 
+		
 #  Sign in with an existing username and password
 def signIn():
 	global userLoginDatabase
